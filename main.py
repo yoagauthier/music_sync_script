@@ -22,23 +22,30 @@ import os
 # command to call
 # ffmpeg -i "/test/file.flac" -y -acodec libvorbis -aq 7 -vn -ac 2 "/test/result.mp3"
 def convert(tuple):
-    input_filepath, output_filepath = tuple
-    call([
-        "ffmpeg",
-        "-i",
-        input_filepath,
-        "-y",
-        "-loglevel",
-        "panic",
-        "-acodec",
-        "libvorbis",
-        "-aq",
-        "7",
-        "-vn",
-        "-ac",
-        "2",
-        output_filepath
-    ])
+    input_filepath, output_filepath, is_to_convert = tuple
+    if is_to_convert:
+        call([
+            "ffmpeg",
+            "-i",
+            input_filepath,
+            "-y",
+            "-loglevel",
+            "panic",
+            "-acodec",
+            "libvorbis",
+            "-aq",
+            "7",
+            "-vn",
+            "-ac",
+            "2",
+            output_filepath
+        ])
+    else:
+        call([
+            "cp",
+            input_filepath,
+            output_filepath
+        ])
     print(output_filepath)
 
 
@@ -69,12 +76,21 @@ if __name__ == "__main__":
                     print(os.path.join(DEST_ROOT_FOLDER_PATH, artist))
 
                 for filename in filenames:
-                    if filename.lower().endswith(('flac', 'ogg', 'mp3', 'wma')):
+                    if filename.lower().endswith(('flac', 'wma')):
                         new_filename = os.path.splitext(filename)[0] + ".ogg"
                         to_convert.append(
                             (
                                 os.path.join(dirpath, filename),
-                                os.path.join(DEST_ROOT_FOLDER_PATH, artist, new_filename)
+                                os.path.join(DEST_ROOT_FOLDER_PATH, artist, new_filename),
+                                True
+                            )
+                        )
+                    elif filename.lower().endswith(('mp3', 'ogg')):
+                        to_convert.append(
+                            (
+                                os.path.join(dirpath, filename),
+                                os.path.join(DEST_ROOT_FOLDER_PATH, artist, filename),
+                                False
                             )
                         )
 
